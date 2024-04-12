@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesquisa de Matrícula</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <input type="text" id="matriculaInput" placeholder="Digite a matrícula">
+    <button onclick="pesquisarMatricula()">Pesquisar</button>
+    <div id="resultadoPesquisa"></div>
+
+    <script>
+        function pesquisarMatricula() {
+            var matriculaInput = parseInt(document.getElementById("matriculaInput").value); // Convertendo para número
+
+            fetch('https://raw.githubusercontent.com/ReframaxTrabalhador/Trabalhador.github.io/main/SEG1.json')
+                .then(response => response.json())
+                .then(data => {
+                    var matriculaEncontrada = false;
+                    for (var i = 0; i < data.length; i++) {
+                        if (data[i].MATRÍCULA === matriculaInput) { // Comparando como número
+                            matriculaEncontrada = true;
+                            exibirResultado(data[i]);
+                            break;
+                        }
+                    }
+                    if (!matriculaEncontrada) {
+                        exibirResultado({}); // Exibe uma linha vazia se a matrícula não for encontrada
+                    }
+                })
+                .catch(error => console.error('Erro ao buscar o arquivo JSON:', error));
+        }
+
+        function exibirResultado(dados) {
+            var resultadoPesquisa = document.getElementById("resultadoPesquisa");
+            resultadoPesquisa.innerHTML = '';
+
+            if (Object.keys(dados).length === 0) {
+                resultadoPesquisa.innerHTML = 'Matrícula não encontrada';
+            } else {
+                var table = '<table>';
+                // Tabela para os dados do colaborador
+                table += '<caption>Dados do Colaborador</caption>';
+                table += '<tr><th>Matrícula</th><td>' + dados['MATRÍCULA'] + '</td></tr>';
+                table += '<tr><th>Nome</th><td>' + dados['NOME'] + '</td></tr>';
+                table += '<tr><th>Função</th><td>' + dados['FUNÇÃO'] + '</td></tr>';
+                table += '<tr><th>RG</th><td>' + dados['RG'] + '</td></tr>';
+                table += '<tr><th>CPF</th><td>' + dados['CPF'] + '</td></tr>';
+                table += '<tr><th>Escala</th><td>' + dados['ESCALA'] + '</td></tr>';
+                table += '<tr><th>Contrato</th><td>' + dados['CONTRATO '] + '</td></tr>';
+                table += '</table>';
+
+                // Tabela para validade dos treinamentos
+                table += '<table>';
+                table += '<caption>Validade dos Treinamentos</caption>';
+                Object.keys(dados).forEach(key => {
+                    if (key !== 'MATRÍCULA' && key !== 'NOME' && key !== 'FUNÇÃO' && key !== 'RG' && key !== 'CPF' && key !== 'ESCALA' && key !== 'CONTRATO ') {
+                        table += '<tr><th>' + key + '</th><td>' + dados[key] + '</td></tr>';
+                    }
+                });
+                table += '</table>';
+
+                resultadoPesquisa.innerHTML = table;
+            }
+        }
+    </script>
+</body>
+</html>
