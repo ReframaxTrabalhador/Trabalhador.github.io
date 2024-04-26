@@ -13,6 +13,7 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            height: 100vh; /* Define a altura da imagem como a altura total da viewport */
         }
         .container {
             max-width: 800px;
@@ -21,10 +22,14 @@
             background-color: rgba(255, 255, 255, 0.8); /* Fundo do conteúdo */
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Sombra */
+            position: relative; /* Permite que a div seja posicionada relativa ao body */
+            z-index: 1; /* Define a ordem de empilhamento da div */
         }
         table {
             border-collapse: collapse;
             width: 100%;
+            max-height: 300px; /* Definindo a altura máxima da tabela */
+            overflow-y: auto; /* Habilitando a rolagem vertical se necessário */
         }
         th, td {
             border: 1px solid #ddd;
@@ -33,6 +38,12 @@
         }
         th {
             background-color: #f2f2f2;
+        }
+        .link-cell {
+            max-width: 200px; /* Definindo a largura máxima para a célula do link */
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
         }
         #matriculaInput {
             padding: 8px;
@@ -98,7 +109,7 @@
                 Object.keys(dados).forEach((key, index, arr) => {
                     if (key !== 'MATRÍCULA' && key !== 'NOME' && key !== 'FUNÇÃO' && key !== 'RG' && key !== 'CPF' && key !== 'ESCALA' && key !== 'CONTRATO ') {
                         if (index === arr.length - 1) {
-                            table += '<tr><th>' + key + '</th><td><a href="http://' + dados[key] + '" target="_blank">' + dados[key] + '</a></td></tr>';
+                            table += '<tr><th>' + key + '</th><td class="link-cell"><a href="http://' + dados[key] + '" target="_blank">Link Pasta</a></td></tr>';
                         } else {
                             table += '<tr><th>' + key + '</th><td>' + dados[key] + '</td></tr>';
                         }
