@@ -93,7 +93,7 @@
             } else {
                 var table = '<table>';
                 // Tabela para os dados do colaborador
-                table += '<caption>Dados do Colaborador</caption>';
+                table += '<caption style="color: #FF0000"><b>DADOS DO COLABORADOR</b></caption>';
                 table += '<tr><th>Matrícula</th><td>' + dados['MATRÍCULA'] + '</td></tr>';
                 table += '<tr><th>Nome</th><td>' + dados['NOME'] + '</td></tr>';
                 table += '<tr><th>Função</th><td>' + dados['FUNÇÃO'] + '</td></tr>';
@@ -104,7 +104,7 @@
 
                 // Tabela para validade dos treinamentos
                 table += '<table>';
-                table += '<caption>Validade dos Treinamentos</caption>';
+                table += '<caption style="color: #FF0000"><b>VALIDADE DOS TREINAMETOS</b></caption>';
                 Object.keys(dados).forEach((key, index, arr) => {
                     if (key !== 'MATRÍCULA' && key !== 'NOME' && key !== 'FUNÇÃO' && key !== 'RG' && key !== 'CPF' && key !== 'ESCALA' && key !== 'CONTRATO ') {
                         if (index === arr.length - 1) {
