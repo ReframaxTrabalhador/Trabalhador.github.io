@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f2f4f7;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .card {
+      background: #fff;
+      max-width: 480px;
+      width: 92%;
+      margin-top: 40px;
+      padding: 32px 28px;
+      border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    h1 { font-size: 20px; color: #1a1a1a; margin: 0 0 6px; }
+    p.sub { color: #666; font-size: 14px; margin: 0 0 24px; }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 6px;
+      margin-top: 14px;
+    }
+    input, select {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #d5d9e0;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+    }
+    input:focus, select:focus { border-color: #2f6feb; }
+    button {
+      width: 100%;
+      margin-top: 22px;
+      padding: 13px;
+      background: #2f6feb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: #2557c7; }
+    button:disabled { background: #a9bde3; cursor: not-allowed; }
+    .row2 { display: flex; gap: 12px; }
+    .row2 > div { flex: 1; }
+    .msg {
+      margin-top: 14px;
+      font-size: 14px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      display: none;
+    }
+    .msg.erro { background: #fdecea; color: #b3261e; display: block; }
+    .msg.sucesso { background: #e6f4ea; color: #1e7e34; display: block; }
+    .colaborador {
+      background: #f0f5ff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #1a3b8f;
+      margin-top: 16px;
+    }
+    .hidden { display: none; }
+    .spinner {
+      display: none;
+      text-align: center;
+      margin-top: 14px;
+      font-size: 13px;
+      color: #888;
+    }
+    .voltar {
+      background: none;
+      color: #2f6feb;
+      font-weight: 500;
+      margin-top: 10px;
+      padding: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <!-- ETAPA 1: MATRÍCULA -->
+    <div id="etapa1">
+      <h1>Atualização de Endereço</h1>
+      <p class="sub">Informe sua matrícula (RM) para continuar.</p>
+
+      <label for="matricula">Matrícula (RM)</label>
+      <input type="text" id="matricula" placeholder="Ex: 139049" inputmode="numeric">
+
+      <button id="btnBuscar" onclick="buscar()">Continuar</button>
+
+      <div class="spinner" id="spinner1">Verificando...</div>
+      <div class="msg erro" id="erro1"></div>
+    </div>
+
+    <!-- ETAPA 2: ENDEREÇO -->
+    <div id="etapa2" class="hidden">
+      <h1>Confirme seu endereço</h1>
+      <div class="colaborador" id="nomeColaborador"></div>
+
+      <label for="cep">CEP</label>
+      <input type="text" id="cep" placeholder="00000-000" inputmode="numeric" maxlength="9" oninput="onCepInput(this)">
+      <div class="spinner" id="cepStatus" style="text-align:left; margin-top:6px;"></div>
+
+      <label for="logradouro">Rua / Avenida</label>
+      <input type="text" id="logradouro" placeholder="Ex: Rua das Flores">
+
+      <div class="row2">
+        <div>
+          <label for="numero">Número</label>
+          <input type="text" id="numero" placeholder="Ex: 123">
+        </div>
+        <div>
+          <label for="complemento">Complemento</label>
+          <input type="text" id="complemento" placeholder="Apto, bloco...">
+        </div>
+      </div>
+
+      <label for="bairro">Bairro</label>
+      <input type="text" id="bairro" placeholder="Ex: Centro">
+
+      <div class="row2">
+        <div>
+          <label for="cidade">Cidade</label>
+          <input type="text" id="cidade" placeholder="Ex: São Paulo">
+        </div>
+        <div>
+          <label for="estado">Estado (UF)</label>
+          <input type="text" id="estado" maxlength="2" placeholder="Ex: SP">
+        </div>
+      </div>
+
+      <button id="btnSalvar" onclick="salvar()">Salvar Endereço</button>
+      <button class="voltar" onclick="voltar()">Voltar</button>
+
+      <div class="spinner" id="spinner2">Salvando...</div>
+      <div class="msg erro" id="erro2"></div>
+    </div>
+
+    <!-- ETAPA 3: SUCESSO -->
+    <div id="etapa3" class="hidden">
+      <h1>Endereço atualizado! ✅</h1>
+      <p class="sub" id="msgSucesso"></p>
+      <button onclick="location.reload()">Atualizar outro endereço</button>
+    </div>
+
+  </div>
+
+  <script>
+    // URL do Web App (implantação atual).
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby0vpF1uUTCzZ3AXwTJF_FdBkgBhuCxQV7gXLrVwxQgqr3vdK2qO6y6MgyL7-ls-4WP/exec";
+    const TIMEOUT_MS = 15000;
+
+    let matriculaAtual = null;
+
+    // Aplica máscara 00000-000 e dispara a busca automática ao completar o CEP
+    function onCepInput(input) {
+      let v = input.value.replace(/\D/g, '').slice(0, 8);
+      input.value = v.length > 5 ? v.slice(0, 5) + '-' + v.slice(5) : v;
+
+      const cepStatus = document.getElementById('cepStatus');
+      cepStatus.textContent = '';
+      cepStatus.style.display = 'none';
+
+      if (v.length === 8) {
+        buscarEnderecoPorCep(v);
+      }
+    }
+
+    function buscarEnderecoPorCep(cepLimpo) {
+      const cepStatus = document.getElementById('cepStatus');
+      cepStatus.textContent = 'Buscando endereço...';
+      cepStatus.style.display = 'block';
+
+      fetch('https://viacep.com.br/ws/' + cepLimpo + '/json/')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          cepStatus.style.display = 'none';
+
+          if (data.erro) {
+            cepStatus.textContent = 'CEP não encontrado. Preencha o endereço manualmente.';
+            cepStatus.style.display = 'block';
+            return;
+          }
+
+          // Preenche os campos — o colaborador ainda pode editar qualquer um deles.
+          document.getElementById('logradouro').value = data.logradouro || '';
+          document.getElementById('bairro').value = data.bairro || '';
+          document.getElementById('cidade').value = data.localidade || '';
+          document.getElementById('estado').value = data.uf || '';
+          document.getElementById('numero').focus();
+        })
+        .catch(function() {
+          cepStatus.textContent = 'Não foi possível buscar o CEP agora. Preencha manualmente.';
+          cepStatus.style.display = 'block';
+        });
+    }
+
+    function chamarServidor(payload) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(function() { controller.abort(); }, TIMEOUT_MS);
+
+      return fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      })
+        .then(function(r) {
+          clearTimeout(timeoutId);
+          if (!r.ok) {
+            throw new Error('Servidor respondeu com status ' + r.status);
+          }
+          return r.json();
+        })
+        .catch(function(err) {
+          clearTimeout(timeoutId);
+          if (err.name === 'AbortError') {
+            throw new Error('Tempo esgotado (15s). Verifique sua conexão ou tente novamente.');
+          }
+          throw err;
+        });
+    }
+
+    function buscar() {
+      const matricula = document.getElementById('matricula').value.trim();
+      const erro = document.getElementById('erro1');
+      erro.style.display = 'none';
+
+      if (!matricula) {
+        erro.textContent = 'Digite sua matrícula.';
+        erro.style.display = 'block';
+        return;
+      }
+
+      document.getElementById('btnBuscar').disabled = true;
+      document.getElementById('spinner1').style.display = 'block';
+
+      chamarServidor({ acao: 'buscar', matricula: matricula })
+        .then(function(resp) {
+          document.getElementById('btnBuscar').disabled = false;
+          document.getElementById('spinner1').style.display = 'none';
+
+          if (resp.erro) {
+            erro.textContent = resp.erro;
+            erro.style.display = 'block';
+            return;
+          }
+
+          if (resp.encontrado) {
+            matriculaAtual = matricula;
+            document.getElementById('nomeColaborador').textContent = 'Colaborador: ' + resp.nome;
+            document.getElementById('etapa1').classList.add('hidden');
+            document.getElementById('etapa2').classList.remove('hidden');
+          } else {
+            erro.textContent = 'Matrícula não encontrada. Verifique o número digitado.';
+            erro.style.display = 'block';
+          }
+        })
+        .catch(function(e) {
+          document.getElementById('btnBuscar').disabled = false;
+          document.getElementById('spinner1').style.display = 'none';
+          erro.textContent = 'Erro ao verificar matrícula: ' + e.message;
+          erro.style.display = 'block';
+        });
+    }
+
+    function salvar() {
+      const cep = document.getElementById('cep').value.trim();
+      const logradouro = document.getElementById('logradouro').value.trim();
+      const numero = document.getElementById('numero').value.trim();
+      const complemento = document.getElementById('complemento').value.trim();
+      const bairro = document.getElementById('bairro').value.trim();
+      const cidade = document.getElementById('cidade').value.trim();
+      const estado = document.getElementById('estado').value.trim();
+
+      const erro = document.getElementById('erro2');
+      erro.style.display = 'none';
+
+      if (!logradouro || !numero || !bairro || !cidade || !estado) {
+        erro.textContent = 'Preencha todos os campos obrigatórios.';
+        erro.style.display = 'block';
+        return;
+      }
+
+      const enderecoCompleto =
+        logradouro + ', ' + numero +
+        (complemento ? ' - ' + complemento : '') +
+        ' - ' + bairro + ' - ' + cidade + '/' + estado +
+        (cep ? ' - CEP ' + cep : '');
+
+      document.getElementById('btnSalvar').disabled = true;
+      document.getElementById('spinner2').style.display = 'block';
+
+      chamarServidor({ acao: 'salvar', matricula: matriculaAtual, endereco: enderecoCompleto })
+        .then(function(resp) {
+          document.getElementById('btnSalvar').disabled = false;
+          document.getElementById('spinner2').style.display = 'none';
+
+          if (resp.sucesso) {
+            document.getElementById('etapa2').classList.add('hidden');
+            document.getElementById('etapa3').classList.remove('hidden');
+            document.getElementById('msgSucesso').textContent =
+              'Endereço salvo com sucesso para ' + resp.nome + '.';
+          } else {
+            erro.textContent = resp.erro || 'Erro ao salvar endereço.';
+            erro.style.display = 'block';
+          }
+        })
+        .catch(function(e) {
+          document.getElementById('btnSalvar').disabled = false;
+          document.getElementById('spinner2').style.display = 'none';
+          erro.textContent = 'Erro ao salvar: ' + e.message;
+          erro.style.display = 'block';
+        });
+    }
+
+    function voltar() {
+      document.getElementById('etapa2').classList.add('hidden');
+      document.getElementById('etapa1').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
